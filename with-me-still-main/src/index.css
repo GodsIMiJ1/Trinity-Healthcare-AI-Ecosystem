@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AGA Companion "WithMe..Still" Design System
+   A calm, grounded, therapeutic aesthetic
+   All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Warm, soft light theme - like morning light */
+    --background: 40 33% 98%;
+    --foreground: 220 20% 20%;
+
+    --card: 40 25% 97%;
+    --card-foreground: 220 20% 20%;
+
+    --popover: 40 25% 97%;
+    --popover-foreground: 220 20% 20%;
+
+    /* Sage green - calming, nature-inspired */
+    --primary: 150 25% 45%;
+    --primary-foreground: 40 33% 98%;
+
+    /* Warm cream secondary */
+    --secondary: 35 30% 92%;
+    --secondary-foreground: 220 20% 25%;
+
+    /* Soft muted tones */
+    --muted: 35 20% 94%;
+    --muted-foreground: 220 15% 50%;
+
+    /* Lavender accent - gentle, supportive */
+    --accent: 260 25% 92%;
+    --accent-foreground: 260 30% 35%;
+
+    /* Soft coral for destructive (less alarming) */
+    --destructive: 12 60% 55%;
+    --destructive-foreground: 40 33% 98%;
+
+    --border: 35 20% 88%;
+    --input: 35 20% 90%;
+    --ring: 150 25% 45%;
+
+    --radius: 1rem;
+
+    /* Crisis/urgent - visible but not jarring */
+    --crisis: 12 70% 50%;
+    --crisis-foreground: 0 0% 100%;
+
+    /* Success - gentle green */
+    --success: 145 40% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warm tones */
+    --warm: 35 50% 60%;
+    --warm-foreground: 35 50% 15%;
+
+    /* Companion-specific tokens */
+    --companion-bubble: 150 20% 95%;
+    --user-bubble: 260 20% 95%;
+
+    --sidebar-background: 40 25% 96%;
+    --sidebar-foreground: 220 20% 25%;
+    --sidebar-primary: 150 25% 45%;
+    --sidebar-primary-foreground: 40 33% 98%;
+    --sidebar-accent: 260 25% 92%;
+    --sidebar-accent-foreground: 260 30% 35%;
+    --sidebar-border: 35 20% 88%;
+    --sidebar-ring: 150 25% 45%;
+  }
+
+  .dark {
+    /* Deep, restful dark theme - like a quiet night */
+    --background: 220 25% 10%;
+    --foreground: 40 20% 92%;
+
+    --card: 220 25% 12%;
+    --card-foreground: 40 20% 92%;
+
+    --popover: 220 25% 12%;
+    --popover-foreground: 40 20% 92%;
+
+    /* Sage green - slightly brighter for dark mode */
+    --primary: 150 30% 50%;
+    --primary-foreground: 220 25% 10%;
+
+    /* Muted warm secondary */
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 40 20% 88%;
+
+    --muted: 220 20% 16%;
+    --muted-foreground: 40 15% 60%;
+
+    /* Lavender accent */
+    --accent: 260 20% 25%;
+    --accent-foreground: 260 30% 80%;
+
+    /* Soft coral destructive */
+    --destructive: 12 50% 45%;
+    --destructive-foreground: 40 20% 95%;
+
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 150 30% 50%;
+
+    /* Crisis - visible in dark */
+    --crisis: 12 65% 55%;
+    --crisis-foreground: 0 0% 100%;
+
+    /* Success */
+    --success: 145 35% 50%;
+    --success-foreground: 220 25% 10%;
+
+    /* Warm tones */
+    --warm: 35 40% 50%;
+    --warm-foreground: 35 40% 95%;
+
+    /* Companion-specific tokens */
+    --companion-bubble: 150 15% 18%;
+    --user-bubble: 260 15% 20%;
+
+    --sidebar-background: 220 25% 11%;
+    --sidebar-foreground: 40 20% 88%;
+    --sidebar-primary: 150 30% 50%;
+    --sidebar-primary-foreground: 220 25% 10%;
+    --sidebar-accent: 260 20% 25%;
+    --sidebar-accent-foreground: 260 30% 80%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 150 30% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

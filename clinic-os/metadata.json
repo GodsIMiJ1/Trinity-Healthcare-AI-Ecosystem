@@ -1,0 +1,8 @@
+{
+  "name": "Clinic OS",
+  "description": "Professional healthcare operations dashboard with AI-powered documentation and clinical training assistants.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

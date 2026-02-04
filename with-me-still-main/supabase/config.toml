@@ -1,0 +1,10 @@
+project_id = "eluhikqoqqgckashuxoa"
+
+[functions.companion-chat]
+verify_jwt = false
+
+[functions.suggest-name]
+verify_jwt = false
+
+[functions.aga-kernel]
+verify_jwt = false
