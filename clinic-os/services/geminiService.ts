@@ -2,6 +2,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { StructuredOutput, DrMentorActionResponse, QuizQuestion } from "../types";
 
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== "false";
+const API_KEY = process.env.API_KEY || process.env.GEMINI_API_KEY;
+
 const BIANCA_SYSTEM_PROMPT = `You are Bianca, a professional Advanced Generative Assistant (AGA) for Clinic OS.
 Your role is to act as an operational copilot for clinical staff.
 Tone: Clinical, efficient, high-trust, and highly precise.
@@ -23,13 +26,49 @@ When giving feedback:
 4. If a user fails, provide empathetic but firm coaching.`;
 
 const getAIClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  if (!API_KEY) {
+    throw new Error("Missing API key");
+  }
+  return new GoogleGenAI({ apiKey: API_KEY });
 };
 
 export const queryBianca = async (
   message: string, 
   context: any
 ): Promise<StructuredOutput> => {
+  if (DEMO_MODE || !API_KEY) {
+    return {
+      assistant_message: "Demo mode: Bianca is operating offline with mock guidance only.",
+      suggested_tasks: [
+        {
+          title: "Review patient intake",
+          description: "Confirm demographics and consent in the chart.",
+          priority: "medium",
+          assigned_to: "Front Desk"
+        }
+      ],
+      draft_note: {
+        content: "Demo note: Patient reports stable symptoms. No acute concerns. Follow-up planned.",
+        sections: {
+          chief_complaint: "Routine follow-up",
+          history: "Stable symptoms, no new issues reported.",
+          assessment: "Condition stable based on self-report.",
+          plan: "Continue current care plan; schedule follow-up."
+        },
+        extracted_action_items: ["Schedule follow-up", "Update consent records"],
+        missing_fields: ["Vitals", "Medications"]
+      },
+      risk_flags: [],
+      required_human_review: true,
+      audit_context: {
+        reasoning_summary: "Demo response generated without external AI.",
+        data_accessed: ["mock_context_only"],
+        confidence_level: 0.5
+      },
+      crisis_detected: false
+    };
+  }
+
   const ai = getAIClient();
   
   const userContext = `
@@ -137,6 +176,18 @@ export const queryDrMentor = async (
     questions?: QuizQuestion[];
   }
 ): Promise<DrMentorActionResponse> => {
+  if (DEMO_MODE || !API_KEY) {
+    return {
+      lesson_summary: `Demo mode: ${action === "start_lesson" ? "Starting" : "Completing"} ${data.moduleTitle}.`,
+      feedback: "This is a demo response with no backend or API keys.",
+      next_steps: [{ step: "Proceed through the module", action: "Continue", required: true }],
+      suggested_review: [],
+      score: action === "submit_quiz"
+        ? { points_earned: 0, points_possible: data.questions?.length || 0, percentage: 0, passed: false }
+        : undefined
+    };
+  }
+
   const ai = getAIClient();
 
   if (action === 'submit_quiz') {

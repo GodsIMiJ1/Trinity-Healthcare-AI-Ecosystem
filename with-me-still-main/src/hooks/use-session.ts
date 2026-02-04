@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getOrCreateSession, updateSession, SessionData, SessionUpdateFields } from "@/lib/session";
 import { supabase } from "@/integrations/supabase/client";
+import { DEMO_MODE } from "@/lib/demo-mode";
 
 export function useSession() {
   const [session, setSession] = useState<SessionData | null>(null);
@@ -22,6 +23,10 @@ export function useSession() {
 
   useEffect(() => {
     initSession();
+
+    if (DEMO_MODE) {
+      return;
+    }
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {

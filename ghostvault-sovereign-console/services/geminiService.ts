@@ -3,18 +3,40 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { SYSTEM_PROMPT } from "../constants";
 
 export class GeminiService {
-  private ai: GoogleGenAI;
+  private ai: GoogleGenAI | null;
   private modelName: string = 'gemini-3-pro-preview';
+  private demoMode: boolean;
+  private apiKey?: string;
 
   constructor() {
+    this.apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+    this.demoMode = import.meta.env.VITE_DEMO_MODE !== "false";
+    if (this.demoMode || !this.apiKey) {
+      this.ai = null;
+      return;
+    }
     // Initialized using process.env.API_KEY directly as per guidelines
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+    this.ai = new GoogleGenAI({ apiKey: this.apiKey });
   }
 
   async queryGhostAGA(query: string, history: { role: string; parts: { text: string }[] }[], moduleContext: string) {
+    if (this.demoMode || !this.apiKey) {
+      return {
+        system_message: "Demo mode: Ghost-AGA is running offline with mock guidance.",
+        analysis: "No external AI calls are made in demo mode.",
+        guidance_steps: [
+          "Review governance checklist",
+          "Verify consent gates in UI",
+          "Confirm audit logging is visible"
+        ],
+        warnings: [],
+        governance_check: "passed"
+      };
+    }
+
     try {
       // Create a fresh instance to ensure the latest API key is used right before the call
-      const client = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+      const client = new GoogleGenAI({ apiKey: this.apiKey! });
       
       const response = await client.models.generateContent({
         model: this.modelName,

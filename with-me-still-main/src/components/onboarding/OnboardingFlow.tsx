@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getCountryOptions } from "@/lib/crisis-resources";
+import { DEMO_MODE } from "@/lib/demo-mode";
 import { Heart, Shield, Brain, Users, ChevronRight, Sparkles, Loader2 } from "lucide-react";
 
 interface OnboardingFlowProps {
@@ -271,6 +272,13 @@ function NamingStep({
   const handleAISuggest = async () => {
     setIsGenerating(true);
     try {
+      if (DEMO_MODE) {
+        const pick = suggestedNames[Math.floor(Math.random() * suggestedNames.length)];
+        onNameChange(pick.name);
+        setNamingMode("ai");
+        return;
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/suggest-name`,
         {

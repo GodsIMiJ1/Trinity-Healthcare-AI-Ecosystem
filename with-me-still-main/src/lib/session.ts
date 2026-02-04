@@ -1,8 +1,10 @@
 // Session management for anonymous + authenticated users
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
+import { DEMO_MODE } from "@/lib/demo-mode";
 
 const ANONYMOUS_ID_KEY = "withme_anonymous_id";
+const DEMO_SESSION_KEY = "withme_demo_session";
 
 export function getAnonymousId(): string {
   let id = localStorage.getItem(ANONYMOUS_ID_KEY);
@@ -80,6 +82,30 @@ function toSessionData(row: {
 }
 
 export async function getOrCreateSession(): Promise<SessionData> {
+  if (DEMO_MODE) {
+    const existing = localStorage.getItem(DEMO_SESSION_KEY);
+    if (existing) {
+      return JSON.parse(existing) as SessionData;
+    }
+
+    const anonymousId = getAnonymousId();
+    const now = new Date().toISOString();
+    const demoSession: SessionData = {
+      id: crypto.randomUUID(),
+      user_id: null,
+      anonymous_id: anonymousId,
+      region: "US",
+      onboarding_completed: false,
+      theme: "system",
+      companion_name: "Still",
+      companion_traits: defaultTraits,
+      created_at: now,
+      updated_at: now,
+    };
+    localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(demoSession));
+    return demoSession;
+  }
+
   const { data: authData } = await supabase.auth.getSession();
   const userId = authData.session?.user?.id || null;
   const anonymousId = userId ? null : getAnonymousId();
@@ -127,6 +153,17 @@ export async function updateSession(
   sessionId: string,
   updates: Partial<Pick<SessionData, SessionUpdateFields>>
 ): Promise<SessionData> {
+  if (DEMO_MODE) {
+    const existing = await getOrCreateSession();
+    const updated: SessionData = {
+      ...existing,
+      ...updates,
+      updated_at: new Date().toISOString(),
+    } as SessionData;
+    localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(updated));
+    return updated;
+  }
+
   // Convert CompanionTraits to Json for database
   const dbUpdates: Record<string, unknown> = {};
   
@@ -156,6 +193,19 @@ export async function migrateAnonymousToUser(
   anonymousSessionId: string,
   userId: string
 ): Promise<SessionData> {
+  if (DEMO_MODE) {
+    const existing = await getOrCreateSession();
+    const updated: SessionData = {
+      ...existing,
+      user_id: userId,
+      anonymous_id: null,
+      updated_at: new Date().toISOString(),
+    };
+    localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(updated));
+    clearAnonymousId();
+    return updated;
+  }
+
   const { data, error } = await supabase
     .from("sessions")
     .update({

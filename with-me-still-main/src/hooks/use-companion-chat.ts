@@ -3,12 +3,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { Message } from "@/components/chat/ConversationInterface";
 import { detectCrisisSignals } from "@/lib/crisis-resources";
 import { useToast } from "@/hooks/use-toast";
+import { DEMO_DELAY_MS, DEMO_MODE } from "@/lib/demo-mode";
 
 interface Memory {
   type: string;
   title: string;
   content: string;
 }
+
+const DEMO_MESSAGES_KEY = (sessionId: string) => `withme_demo_messages_${sessionId}`;
+
+const buildDemoReply = (content: string, companionName: string) => {
+  const trimmed = content.trim();
+  const prefix = trimmed ? `"${trimmed}"` : "that";
+  return [
+    `Thanks for sharing ${prefix}.`,
+    `I'm here with you, ${companionName}.`,
+    "This is a demo response with no backend or API keys.",
+    "If you'd like, tell me more about how today is feeling for you."
+  ].join(" ");
+};
 
 export function useCompanionChat(sessionId: string | null, companionName: string = "Still") {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -52,6 +66,30 @@ export function useCompanionChat(sessionId: string | null, companionName: string
       setIsLoading(true);
 
       try {
+        if (DEMO_MODE) {
+          const assistantId = crypto.randomUUID();
+          const assistantContent = buildDemoReply(content, companionName);
+
+          await new Promise((resolve) => setTimeout(resolve, DEMO_DELAY_MS));
+
+          const assistantMessage: Message = {
+            id: assistantId,
+            role: "assistant",
+            content: assistantContent,
+            createdAt: new Date(),
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+
+          const stored = localStorage.getItem(DEMO_MESSAGES_KEY(sessionId));
+          const existing = stored ? (JSON.parse(stored) as Message[]) : [];
+          localStorage.setItem(
+            DEMO_MESSAGES_KEY(sessionId),
+            JSON.stringify([...existing, userMessage, assistantMessage])
+          );
+          return;
+        }
+
         // Prepare messages for API
         const apiMessages = messages.map((m) => ({
           role: m.role,
@@ -181,6 +219,19 @@ export function useCompanionChat(sessionId: string | null, companionName: string
 
   const loadMessages = useCallback(async () => {
     if (!sessionId) return;
+
+    if (DEMO_MODE) {
+      const stored = localStorage.getItem(DEMO_MESSAGES_KEY(sessionId));
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as Message[];
+      setMessages(
+        parsed.map((m) => ({
+          ...m,
+          createdAt: new Date(m.createdAt),
+        }))
+      );
+      return;
+    }
 
     const { data, error } = await supabase
       .from("messages")
